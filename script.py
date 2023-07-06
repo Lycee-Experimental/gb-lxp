@@ -11,7 +11,7 @@ from openpyxl import load_workbook
 ## Elève qui lache la 3 -> G5 ou G1
 
 # Ouverture du fichier excel
-file_path = "./base-eleve2.xlsx"
+file_path = "base/base-eleve2.xlsx"
 df = pd.read_excel(file_path)
 
 gbs = ['G1', 'G2', 'G3', 'G4', 'G5']
