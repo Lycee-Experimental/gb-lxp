@@ -47,8 +47,10 @@ StepAPI= No
 ## Passage au Dark Mode :
 
 > outils > options > Libre Office 
-  > Affichage > Mode : sombre, Thème : Colibre(SVG+Dark)
-  > Couleur de l'interface : Libreoffice Dark
+
+> Affichage > Mode : sombre, Thème : Colibre(SVG+Dark)
+
+> Couleur de l'interface : Libreoffice Dark
 
 ## Ouvrir le formulaire au démarage de base
 
@@ -61,6 +63,7 @@ Sécurité > Sécurité des macros > Faible
 Macro :
 Outils > MAcro > Gérer les macros > Basic > Nouveau 
 
+```basic
 SUB OuvrirFormulaire
   Dim ObjTypeWhat
   Dim ObjName As String
@@ -75,6 +78,7 @@ SUB OuvrirFormulaire
       MsgBox "Error! Wrong form name used. " & ObjName
   End if
 End Sub
+```
 
 ### Lancement de la macro à l'ouverture d'un doc
 

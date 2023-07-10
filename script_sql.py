@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 
-con = sqlite3.connect("/home/davy/base.db")
+con = sqlite3.connect("base/base.db")
 df = pd.read_sql("select * from Élèves", con)
 
 # Formate les nom avec des majuscules au début
@@ -23,16 +23,16 @@ df['Responsable2Telephone'] = df['Responsable2Telephone'].apply(lambda x: format
 
 # Définition des variables
 gbs = ['G1', 'G2', 'G3', 'G4', 'G5']
-anciennetes = ['Ancien·ne', "Nouvelleau"]
-genres = ["M","F","A"]
+anciennetes = ['Ré-inscrit(e)', "Nouveau-elle"]
+genres = ["M","F"]
 niveaux = [ "Terminale", "CREPA", "Déter", "Première"]
-spe1 = ['ArtPla', 'Ciné', 'Théatre', 'HGGSP'] 
+spe1 = ['Arts plastiques', 'Cinéma', 'Théâtre', 'Hist-géo-po'] 
 spe2 = ['Anglais', 'Espagnol', 'SVT', 'Maths']
-spe3 = ['SES', 'HLP', 'NSI', 'PhyChim']
+spe3 = ['SES', 'Huma-Litté-Philo', 'Numérique SI', 'Physique-Chimie']
 mee = {
 'Nath': 'G4',
-'Clem': 'G2',
-'Benj': 'G4',
+'Clémentine': 'G2',
+'Benjamin': 'G4',
 'Julie': 'G3',
 'Valentin': 'G5',
 'Davy': 'G2',
@@ -40,7 +40,7 @@ mee = {
 'Maude': 'G5',
 'Fanny': 'G5',
 'Enoch': 'G1',
-'Mika': 'G3',
+'Mikaël': 'G3',
 'Flora': 'G4',
 'Renaud':'G4'
 }
@@ -48,13 +48,19 @@ mee = {
 for niveau in niveaux:
     for genre in genres:
         for anciennete in anciennetes:
-            selected_rows = df[(df["Ancienneté"] == anciennete) & (df["Genre"] == genre) & (df["Niveau"] == niveau)].sample(frac=1)
+            selected_rows = df[(df["Situation"] == anciennete) & (df["Sexe"] == genre) & (df["AECProjet"] == niveau)].sample(frac=1)
             for index, row in selected_rows.iterrows():  
-                value_counts = df["GB"].value_counts()
-                
-                print(value_counts)
+                value_counts = df["AECGroupeBase"].value_counts()
+                if anciennete == 'Ré-inscrit(e)':
+                    for i in range(1,7):
+                        if row["ParcoursAnnée"+str(i)] =='2022/2023':
+                            Suivi=row["ParcoursMEE"+str(i)]
+                        else:
+                            Suivi=''
+                else:
+                    Suivi=''
                 if niveau == 'Terminale':        
-                    spes = row[['spe1', 'spe2', 'spe3']].values
+                    spes = row[['AECSpécialité1', 'AECSpécialité2', 'AECSpécialité3']].values
                     combi_spe = []
                     for spe in spe1:
                         if spe in spes:
@@ -72,26 +78,14 @@ for niveau in niveaux:
                     if 3 not in combi_spe:
                         result = ['G5','G1']
                     
-                    if pd.notna(row[['ECCO']].values):
-                        ecco = row[['ECCO']].values
-                        result = [value for value in result if value != mee[ecco[0]]]
-                    print(result)
+                    result = [value for value in result if value != Suivi]
                     sorted_result = sorted(result, key=lambda x: value_counts.get(x, 0))
-                    print(sorted_result[0])
-                    df.loc[index, 'GB'] = sorted_result[0]
+                    df.loc[index, 'AECGroupeBase'] = sorted_result[0]
                 else:
-                    if pd.notna(row[['ECCO']].values):
-                        ecco = row[['ECCO']].values
-                        result = [value for value in gbs if value != mee[ecco[0]]]
-                    else:
-                        result = gbs
-                    print(result)
+                    result = [value for value in gbs if value != Suivi]
                     sorted_result = sorted(result, key=lambda x: value_counts.get(x, 0))
-                    print(sorted_result)
-                    df.loc[index, "GB"] = sorted_result[0]
-
+                    df.loc[index, "AECGroupeBase"] = sorted_result[0]
 
 # Enregistrement
 df.to_sql("Élèves", con, if_exists="replace", index=False, dtype={'ID': 'INTEGER PRIMARY KEY AUTOINCREMENT'})
 con.close()
-
