@@ -45,46 +45,55 @@ mee = {
 'Renaud':'G4'
 }
 
+
+# Chargement du fichier avec les définitions manuelles de GB (avec ID)
+df_force = pd.read_csv('force.csv')
+
 for niveau in niveaux:
     for genre in genres:
         for anciennete in anciennetes:
             selected_rows = df[(df["Situation"] == anciennete) & (df["Sexe"] == genre) & (df["AECProjet"] == niveau)].sample(frac=1)
-            for index, row in selected_rows.iterrows():  
-                value_counts = df["AECGroupeBase"].value_counts()
-                if anciennete == 'Ré-inscrit(e)':
-                    for i in range(1,7):
-                        if row["ParcoursAnnée"+str(i)] =='2022/2023':
-                            Suivi=row["ParcoursMEE"+str(i)]
-                        else:
-                            Suivi=''
+            for index, row in selected_rows.iterrows():
+                force_gb = df_force.loc[df_force.iloc[:, 0] == row["ID"], df_force.columns[1]].values
+                if len(force_gb) > 0:
+                    print(row["Prenom"]+' en '+force_gb[0])
+                    df.loc[index, "AECGroupeBase"] = force_gb[0]
                 else:
-                    Suivi=''
-                if niveau == 'Terminale':        
-                    spes = row[['AECSpécialité1', 'AECSpécialité2', 'AECSpécialité3']].values
-                    combi_spe = []
-                    for spe in spe1:
-                        if spe in spes:
-                            combi_spe.append(1)
-                    for spe in spe2:
-                        if spe in spes:
-                            combi_spe.append(2)
-                    for spe in spe3:
-                        if spe in spes:
-                            combi_spe.append(3)
-                    if 1 not in combi_spe:
-                        result = ['G3','G2']
-                    if 2 not in combi_spe:
-                        result = ['G4','G2']
-                    if 3 not in combi_spe:
-                        result = ['G5','G1']
-                    
-                    result = [value for value in result if value != Suivi]
-                    sorted_result = sorted(result, key=lambda x: value_counts.get(x, 0))
-                    df.loc[index, 'AECGroupeBase'] = sorted_result[0]
-                else:
-                    result = [value for value in gbs if value != Suivi]
-                    sorted_result = sorted(result, key=lambda x: value_counts.get(x, 0))
-                    df.loc[index, "AECGroupeBase"] = sorted_result[0]
+                    value_counts = df["AECGroupeBase"].value_counts()
+                    if anciennete == 'Ré-inscrit(e)':
+                        for i in range(1,7):
+                            if row["ParcoursAnnée"+str(i)] =='2022/2023':
+                                Suivi=row["ParcoursMEE"+str(i)]
+                            else:
+                                Suivi=''
+                    else:
+                        Suivi=''
+                    if niveau == 'Terminale':        
+                        spes = row[['AECSpécialité1', 'AECSpécialité2', 'AECSpécialité3']].values
+                        combi_spe = []
+                        for spe in spe1:
+                            if spe in spes:
+                                combi_spe.append(1)
+                        for spe in spe2:
+                            if spe in spes:
+                                combi_spe.append(2)
+                        for spe in spe3:
+                            if spe in spes:
+                                combi_spe.append(3)
+                        if 1 not in combi_spe:
+                            result = ['G3','G2']
+                        if 2 not in combi_spe:
+                            result = ['G4','G2']
+                        if 3 not in combi_spe:
+                            result = ['G5','G1']
+                        
+                        result = [value for value in result if value != Suivi]
+                        sorted_result = sorted(result, key=lambda x: value_counts.get(x, 0))
+                        df.loc[index, 'AECGroupeBase'] = sorted_result[0]
+                    else:
+                        result = [value for value in gbs if value != Suivi]
+                        sorted_result = sorted(result, key=lambda x: value_counts.get(x, 0))
+                        df.loc[index, "AECGroupeBase"] = sorted_result[0]
 
 # Enregistrement
 df.to_sql("Élèves", con, if_exists="replace", index=False, dtype={'ID': 'INTEGER PRIMARY KEY AUTOINCREMENT'})
