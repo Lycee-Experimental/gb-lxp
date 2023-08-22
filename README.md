@@ -9,7 +9,7 @@ Pour éviter d'avoir à mettre en place une base MySql ou Posgresql, nous allons
 ### Installation de ODBC
 **ODBC** est le protocole qui permettra de faire le lien entre Libreoffice et la base **SQLite**.
 ```bash
-sudo apt install unixodbc-common libsqliteodbc
+sudo apt install unixodbc unixodbc-common libsqliteodbc
 ```
 ### Configuration de ODBC
 
